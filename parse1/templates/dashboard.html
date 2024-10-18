@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .card {
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        .table {
+            margin-top: 15px;
+        }
+
+        .refresh-info {
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <h1>User Activity Dashboard</h1>
+
+    <div class="container">
+        <!-- All Users Section -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>All Users</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Activity Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Anomalies Section -->
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3>Recent Anomalies (Last 5 minutes)</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="anomaly-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Refresh Info -->
+        <div class="refresh-info">
+            <p>Data refreshes every 10 seconds</p>
+        </div>
+    </div>
+
+    <script>
+        function fetchData() {
+            $.getJSON('/api/users', function (data) {
+                let userTableBody = '';
+                data.forEach(user => {
+                    userTableBody += `<tr><td>${user.user_id}</td><td>${user.activity_count}</td></tr>`;
+                });
+                $('#user-table-body').html(userTableBody);
+            });
+
+            $.getJSON('/api/anomalies', function (data) {
+                let anomalyTableBody = '';
+                data.forEach(anomaly => {
+                    anomalyTableBody += `<tr><td>${anomaly.user_id}</td><td>${anomaly.timestamp}</td></tr>`;
+                });
+                $('#anomaly-table-body').html(anomalyTableBody);
+            });
+        }
+
+        // 10초마다 데이터 갱신
+        setInterval(fetchData, 10000);
+        // 페이지 로드 시 데이터 가져오기
+        fetchData();
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

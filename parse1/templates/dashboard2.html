@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #343a40;
+        }
+        .card {
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>User Activity Dashboard</h1>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>User Activity Overview</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="userActivityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3>Recent Anomalies (Last 5 minutes)</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="anomalyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userActivityChart, anomalyChart;
+
+        // 사용자 활동 차트 생성 및 갱신
+        function renderUserActivityChart(data) {
+            const labels = data.map(user => user.user_id);
+            const activityCounts = data.map(user => user.activity_count);
+
+            if (userActivityChart) {
+                userActivityChart.data.labels = labels;
+                userActivityChart.data.datasets[0].data = activityCounts;
+                userActivityChart.update();
+            } else {
+                const ctx = document.getElementById('userActivityChart').getContext('2d');
+                userActivityChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Activity Count',
+                            data: activityCounts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 이상 이벤트 차트 생성 및 갱신
+        function renderAnomalyChart(data) {
+            const labels = data.map(anomaly => anomaly.user_id);
+            const anomalyCounts = data.map(anomaly => anomaly.anomaly_count);
+
+            if (anomalyChart) {
+                anomalyChart.data.labels = labels;
+                anomalyChart.data.datasets[0].data = anomalyCounts;
+                anomalyChart.update();
+            } else {
+                const ctx = document.getElementById('anomalyChart').getContext('2d');
+                anomalyChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Anomaly Count',
+                            data: anomalyCounts,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 206, 86, 0.6)',
+                                'rgba(75, 192, 192, 0.6)',
+                                'rgba(153, 102, 255, 0.6)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            }
+        }
+
+        // 데이터 가져오기 및 차트 렌더링
+        function fetchDataAndRenderCharts() {
+            fetch('/api/user-activities')
+                .then(response => response.json())
+                .then(data => renderUserActivityChart(data));
+
+            fetch('/api/recent-anomalies')
+                .then(response => response.json())
+                .then(data => renderAnomalyChart(data));
+        }
+
+        // 초기 데이터 로드 및 10초마다 갱신
+        fetchDataAndRenderCharts();
+        setInterval(fetchDataAndRenderCharts, 10000);
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
