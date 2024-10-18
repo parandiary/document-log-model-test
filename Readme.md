@@ -17,17 +17,21 @@ dashboard-user2.ipynb
 
 
 ## 실행 준비
+`
 conda activate penv312
+`
 
 ### 필요 라이브러리 설치
+`
 pip install psycopg2-binary sqlalchemy pandas scikit-learn flask requests
 conda install psycopg2-binary sqlalchemy pandas scikit-learn flask requests
 
 conda activate penv312
-
+`
 
 
 ### 데이타베이스 테이블 생성
+`
 -- public.anomaly_logs definition
 
 -- Drop table
@@ -63,3 +67,5 @@ CREATE TABLE public.document_logs (
 	is_anomaly bool DEFAULT false NULL,
 	CONSTRAINT document_logs_pkey PRIMARY KEY (id)
 );
+
+`
